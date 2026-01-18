@@ -1,0 +1,5 @@
+name: SimplePlaytime
+version: '${version}'
+main: com.xiaobai.simpleplaytime.SimplePlaytime
+api-version: '1.21'
+depend: [PlaceholderAPI]
