@@ -1,5 +1,7 @@
 name: SimplePlaytime
-version: '${version}'
+version: '${project.version}'
 main: com.xiaobai.simpleplaytime.SimplePlaytime
 api-version: '1.21'
+authors: [yangzijian52]
+description: 简单在线时长统计与 PlaceholderAPI 变量插件
 depend: [PlaceholderAPI]

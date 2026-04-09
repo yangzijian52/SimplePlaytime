@@ -19,14 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class SimplePlaytime extends JavaPlugin implements Listener {
-
-    // 【修改点1】使用 ConcurrentHashMap 防止异步保存时报错
-    private final Map<UUID, Long> totalPlaytime = new ConcurrentHashMap<>(); 
-    private final Map<UUID, Long> sessionStart = new ConcurrentHashMap<>();  
-    
+    private final Map<UUID, Long> totalPlaytime = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> sessionStart = new ConcurrentHashMap<>();
     private final File dataFile = new File(getDataFolder(), "data.json");
     private final Gson gson = new Gson();
-    
+
     private List<Map.Entry<UUID, Long>> topCache = new ArrayList<>();
 
     @Override
@@ -37,10 +34,8 @@ public class SimplePlaytime extends JavaPlugin implements Listener {
             new PlaytimeExpansion().register();
             getLogger().info("PlaceholderAPI 变量已注册！");
         }
-        
-        // 定时保存 (每5分钟)
+
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveData, 6000L, 6000L);
-        // 排行榜刷新 (每1分钟)
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::updateTopCache, 20L, 1200L);
 
         long now = System.currentTimeMillis();
@@ -49,18 +44,18 @@ public class SimplePlaytime extends JavaPlugin implements Listener {
                 sessionStart.put(p.getUniqueId(), now);
             }
         }
+        updateTopCache();
+        getLogger().info("SimplePlaytime 已启用");
     }
 
     @Override
     public void onDisable() {
-        // 关服时，先结算所有在线玩家的时间
         long now = System.currentTimeMillis();
         for (UUID uuid : sessionStart.keySet()) {
             long start = sessionStart.get(uuid);
             totalPlaytime.put(uuid, totalPlaytime.getOrDefault(uuid, 0L) + (now - start));
         }
         sessionStart.clear();
-        // 然后执行最后一次保存
         saveData();
     }
 
@@ -77,8 +72,6 @@ public class SimplePlaytime extends JavaPlugin implements Listener {
             long start = sessionStart.remove(uuid);
             long sessionTime = System.currentTimeMillis() - start;
             totalPlaytime.put(uuid, totalPlaytime.getOrDefault(uuid, 0L) + sessionTime);
-            
-            // 玩家退出时单独触发一次保存
             Bukkit.getScheduler().runTaskAsynchronously(this, this::saveData);
         }
     }
@@ -178,9 +171,9 @@ public class SimplePlaytime extends JavaPlugin implements Listener {
         @Override
         public @NotNull String getIdentifier() { return "spt"; }
         @Override
-        public @NotNull String getAuthor() { return "XiaoBai"; }
+        public @NotNull String getAuthor() { return "yangzijian52"; }
         @Override
-        public @NotNull String getVersion() { return "1.0.0"; }
+        public @NotNull String getVersion() { return SimplePlaytime.this.getPluginMeta().getVersion(); }
         @Override
         public boolean persist() { return true; }
 
